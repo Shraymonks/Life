@@ -18,7 +18,7 @@
 
 		for (i = xMin; i <= xMax; ++i)
 			for (j = yMin; j <= yMax; ++j)
-				if (i >= 0 && j >= 0 && i < Life.canvas.width && j < Life.canvas.height && !(i === x && j === y))
+				if (i >= 0 && j >= 0 && i < Life.width && j < Life.height && !(i === x && j === y))
 					alive += Life.board[i][j].isAlive ? 1 : 0;
 
 		return alive;
@@ -48,18 +48,25 @@
 			};
 	})(),
 	Life = {
-		init: function () {
+		init: function (options) {
 			var x, y;
+
+			options = options || {};
 
 			this.canvas = document.getElementsByTagName('canvas')[0];
 			this.ctx = this.canvas.getContext('2d');
 			this.canvas.width = d.documentElement.clientWidth;
 			this.canvas.height = d.documentElement.clientHeight;
 
+			this.pixelSize = options.pixelSize || 1;
+
+			this.width = Math.floor(this.canvas.width / this.pixelSize);
+			this.height = Math.floor(this.canvas.height / this.pixelSize);
+
 			this.board = [];
-			for (x = 0; x < this.canvas.width; ++x) {
+			for (x = 0; x < this.width; ++x) {
 				this.board.push([]);
-				for (y = 0; y < this.canvas.height; ++y)
+				for (y = 0; y < this.height; ++y)
 					this.board[x][y] = new Cell(Math.floor(Math.random() * 2));
 			}
 
@@ -69,29 +76,36 @@
 		step: function () {
 			var newBoard = [], x, y;
 
-			for (x = 0; x < this.canvas.width; ++x) {
+			for (x = 0; x < this.width; ++x) {
 				newBoard.push([]);
-				for (y = 0; y < this.canvas.height; ++y) {
+				for (y = 0; y < this.height; ++y) {
 					newBoard[x][y] = new Cell(this.board[x][y].nextState(x, y));
 				}
 			}
 			this.board = newBoard;
 		},
 		draw: function () {
-			var x, y;
+			var x, y, xPixels;
 			requestAnimFrame(Life.draw);
-			for (x = 0; x < Life.canvas.width; ++x)
-				for (y = 0; y < Life.canvas.height; ++y) {
-					Life.ctx.fillStyle = Life.board[x][y].isAlive ? 'black' : 'white';
-					Life.ctx.fillRect(x, y, 1, 1);
-				}
+			Life.ctx.fillStyle = 'white';
+			Life.ctx.fillRect(0, 0, Life.canvas.width, Life.canvas.height);
+			for (x = 0; x < Life.width; ++x) {
+				xPixels = x * Life.pixelSize;
+				for (y = 0; y < Life.height; ++y)
+					if (Life.board[x][y].isAlive) {
+						Life.ctx.fillStyle = 'black';
+						Life.ctx.fillRect(xPixels, y * Life.pixelSize, Life.pixelSize, Life.pixelSize);
+					}
+			}
 
 			Life.step();
 		},
 		setHandlers: function () {
 			w.addEventListener('resize', function () {
-				this.canvas.width = d.documentElement.clientWidth;
-				this.canvas.height = d.documentElement.clientHeight;
+				Life.canvas.width = d.documentElement.clientWidth;
+				Life.canvas.height = d.documentElement.clientHeight;
+				Life.width = Math.floor(Life.canvas.width / Life.pixelSize);
+				Life.height = Math.floor(Life.canvas.height / Life.pixelSize);
 			});
 		}
 	};
