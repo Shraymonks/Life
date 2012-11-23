@@ -8,18 +8,21 @@
 	}
 
 	Cell.prototype.aliveNeighbours = function (x, y) {
-		var xMin = x - 1,
-			yMin = y - 1,
-			xMax = x + 1,
-			yMax = y + 1,
+		var xMin = Math.max(x - 1, 0),
+			yMin = Math.max(y - 1, 0),
+			xMax = Math.min(x + 1, Life.width - 1),
+			yMax = Math.min(y + 1, Life.height - 1),
 			alive = 0,
 			i,
 			j;
 
 		for (i = xMin; i <= xMax; ++i)
-			for (j = yMin; j <= yMax; ++j)
-				if (i >= 0 && j >= 0 && i < Life.width && j < Life.height && !(i === x && j === y))
+			for (j = yMin; j <= yMax; ++j) {
+				if (alive > 3)
+					return 4;
+				if (!(i === x && j === y))
 					alive += Life.board[i][j].isAlive ? 1 : 0;
+			}
 
 		return alive;
 	};
@@ -65,7 +68,7 @@
 
 			this.board = [];
 			for (x = 0; x < this.width; ++x) {
-				this.board.push([]);
+				this.board[x] = [];
 				for (y = 0; y < this.height; ++y)
 					this.board[x][y] = new Cell(Math.floor(Math.random() * 2));
 			}
@@ -77,7 +80,7 @@
 			var newBoard = [], x, y;
 
 			for (x = 0; x < this.width; ++x) {
-				newBoard.push([]);
+				newBoard[x] = [];
 				for (y = 0; y < this.height; ++y) {
 					newBoard[x][y] = new Cell(this.board[x][y].nextState(x, y));
 				}
@@ -88,7 +91,7 @@
 			var x, y, xPixels;
 			requestAnimFrame(Life.draw);
 			Life.ctx.fillStyle = 'white';
-			Life.ctx.fillRect(0, 0, Life.canvas.width, Life.canvas.height);
+			Life.ctx.clearRect(0, 0, Life.canvas.width, Life.canvas.height);
 			for (x = 0; x < Life.width; ++x) {
 				xPixels = x * Life.pixelSize;
 				for (y = 0; y < Life.height; ++y)
@@ -110,6 +113,6 @@
 		}
 	};
 
-	Life.init();
+	Life.init({pixelSize: 2});
 
 }).call(this, document, window);
