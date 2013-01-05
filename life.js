@@ -16,13 +16,25 @@
 
     Cell.prototype.aliveNeighbours = function(xMid, yMid) {
       var alive, x, xMax, xMin, y, yMax, yMin, _i, _j;
-      xMin = Math.max(xMid - 1, 0);
-      yMin = Math.max(yMid - 1, 0);
-      xMax = Math.min(xMid + 1, Life.width - 1);
-      yMax = Math.min(yMid + 1, Life.height - 1);
+      xMin = xMid - 1;
+      yMin = yMid - 1;
+      xMax = xMid + 1;
+      yMax = yMid + 1;
       alive = 0;
       for (x = _i = xMin; xMin <= xMax ? _i <= xMax : _i >= xMax; x = xMin <= xMax ? ++_i : --_i) {
         for (y = _j = yMin; yMin <= yMax ? _j <= yMax : _j >= yMax; y = yMin <= yMax ? ++_j : --_j) {
+          if (x < 0) {
+            x = Life.width - 1;
+          }
+          if (x === Life.width) {
+            x = 0;
+          }
+          if (y < 0) {
+            y = Life.height - 1;
+          }
+          if (y === Life.height) {
+            y = 0;
+          }
           if ((x !== xMid || y !== yMid) && Life.board[x][y].isAlive) {
             if (alive === 3) {
               return 4;
@@ -78,22 +90,28 @@
       return this.board = newBoard;
     },
     draw: function() {
-      var x, xPixels, y, _i, _j, _ref, _ref1,
+      var canvasPixelWidth, imageData, imageDataColAlpha, pixelX, pixelY, x, xPixels, y, yPixels, _i, _j, _k, _l, _ref, _ref1, _ref2, _ref3,
         _this = this;
       requestAnimFrame(function() {
         return _this.draw();
       });
-      this.ctx.fillStyle = 'white';
-      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-      this.ctx.fillStyle = 'black';
+      imageData = this.ctx.createImageData(this.canvas.width, this.canvas.height);
+      canvasPixelWidth = imageData.width * 4;
       for (x = _i = 0, _ref = this.width; 0 <= _ref ? _i < _ref : _i > _ref; x = 0 <= _ref ? ++_i : --_i) {
         xPixels = x * this.pixelSize;
         for (y = _j = 0, _ref1 = this.height; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; y = 0 <= _ref1 ? ++_j : --_j) {
-          if (this.board[x][y].isAlive) {
-            this.ctx.fillRect(xPixels, y * this.pixelSize, this.pixelSize, this.pixelSize);
+          yPixels = y * this.pixelSize;
+          for (pixelX = _k = 0, _ref2 = this.pixelSize; 0 <= _ref2 ? _k < _ref2 : _k > _ref2; pixelX = 0 <= _ref2 ? ++_k : --_k) {
+            imageDataColAlpha = (xPixels + pixelX) * 4 + 3;
+            for (pixelY = _l = 0, _ref3 = this.pixelSize; 0 <= _ref3 ? _l < _ref3 : _l > _ref3; pixelY = 0 <= _ref3 ? ++_l : --_l) {
+              if (this.board[x][y].isAlive) {
+                imageData.data[(yPixels + pixelY) * canvasPixelWidth + imageDataColAlpha] = 255;
+              }
+            }
           }
         }
       }
+      this.ctx.putImageData(imageData, 0, 0);
       return this.step();
     },
     setHandlers: function() {

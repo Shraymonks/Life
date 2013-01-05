@@ -11,15 +11,21 @@ class Cell
 	constructor: (@isAlive) ->
 
 	aliveNeighbours: (xMid, yMid) ->
-		xMin = Math.max xMid - 1, 0
-		yMin = Math.max yMid - 1, 0
-		xMax = Math.min xMid + 1, Life.width - 1
-		yMax = Math.min yMid + 1, Life.height - 1
+		xMin = xMid - 1
+		yMin = yMid - 1
+		xMax = xMid + 1
+		yMax = yMid + 1
 
 		alive = 0
 
 		for x in [xMin..xMax]
 			for y in [yMin..yMax]
+				if x < 0 then x = Life.width - 1
+				if x is Life.width then x = 0
+
+				if y < 0 then y = Life.height - 1
+				if y is Life.height then y = 0
+
 				if (x isnt xMid or y isnt yMid) and Life.board[x][y].isAlive
 					if alive is 3 then return 4
 					else ++alive
@@ -65,17 +71,23 @@ Life =
 
 		@board = newBoard
 
+
 	draw: ->
 		requestAnimFrame => do @draw
-		@ctx.fillStyle = 'white';
-		@ctx.clearRect 0, 0, @canvas.width, @canvas.height
-		@ctx.fillStyle = 'black'
+		imageData = @ctx.createImageData @canvas.width, @canvas.height
+		canvasPixelWidth = imageData.width * 4
 		for x in [0...@width]
 			xPixels = x * @pixelSize
-
 			for y in [0...@height]
-				if @board[x][y].isAlive
-					@ctx.fillRect xPixels, y * @pixelSize, @pixelSize, @pixelSize
+				yPixels = y * @pixelSize
+
+				# Cell pixel loop
+				for pixelX in [0...@pixelSize]
+					imageDataColAlpha = (xPixels + pixelX) * 4 + 3
+					for pixelY in [0...@pixelSize]
+						imageData.data[(yPixels + pixelY) * canvasPixelWidth + imageDataColAlpha] = 255 if @board[x][y].isAlive
+
+		@ctx.putImageData imageData, 0, 0
 
 		do @step
 
