@@ -52,9 +52,9 @@ Life =
 		@height = Math.floor @canvas.height / @pixelSize
 
 		@board = []
-		for x in [0...@width]
+		for x in [0...window.screen.availWidth]
 			@board[x] = []
-			for y in [0...@height]
+			for y in [0...window.screen.availWidth]
 				@board[x][y] = new Cell (Math.floor (Math.random() * 2))
 
 		do @setHandlers
@@ -69,8 +69,8 @@ Life =
 			for y in [0...@height]
 				newBoard[x][y] = new Cell (@board[x][y].nextState x, y)
 
-		@board = newBoard
-
+		for row, x in newBoard
+			@board[x][y] = cell for cell, y in row
 
 	draw: ->
 		requestAnimFrame => do @draw

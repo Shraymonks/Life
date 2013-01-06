@@ -69,9 +69,9 @@
       this.width = Math.floor(this.canvas.width / this.pixelSize);
       this.height = Math.floor(this.canvas.height / this.pixelSize);
       this.board = [];
-      for (x = _i = 0, _ref = this.width; 0 <= _ref ? _i < _ref : _i > _ref; x = 0 <= _ref ? ++_i : --_i) {
+      for (x = _i = 0, _ref = window.screen.availWidth; 0 <= _ref ? _i < _ref : _i > _ref; x = 0 <= _ref ? ++_i : --_i) {
         this.board[x] = [];
-        for (y = _j = 0, _ref1 = this.height; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; y = 0 <= _ref1 ? ++_j : --_j) {
+        for (y = _j = 0, _ref1 = window.screen.availWidth; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; y = 0 <= _ref1 ? ++_j : --_j) {
           this.board[x][y] = new Cell(Math.floor(Math.random() * 2));
         }
       }
@@ -79,7 +79,7 @@
       return this.draw();
     },
     step: function() {
-      var newBoard, x, y, _i, _j, _ref, _ref1;
+      var cell, newBoard, row, x, y, _i, _j, _k, _len, _ref, _ref1, _results;
       newBoard = [];
       for (x = _i = 0, _ref = this.width; 0 <= _ref ? _i < _ref : _i > _ref; x = 0 <= _ref ? ++_i : --_i) {
         newBoard[x] = [];
@@ -87,7 +87,20 @@
           newBoard[x][y] = new Cell(this.board[x][y].nextState(x, y));
         }
       }
-      return this.board = newBoard;
+      _results = [];
+      for (x = _k = 0, _len = newBoard.length; _k < _len; x = ++_k) {
+        row = newBoard[x];
+        _results.push((function() {
+          var _l, _len1, _results1;
+          _results1 = [];
+          for (y = _l = 0, _len1 = row.length; _l < _len1; y = ++_l) {
+            cell = row[y];
+            _results1.push(this.board[x][y] = cell);
+          }
+          return _results1;
+        }).call(this));
+      }
+      return _results;
     },
     draw: function() {
       var canvasPixelWidth, imageData, imageDataColAlpha, pixelX, pixelY, x, xPixels, y, yPixels, _i, _j, _k, _l, _ref, _ref1, _ref2, _ref3,
